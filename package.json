@@ -40,7 +40,9 @@
   },
   "packageManager": "pnpm@11.28.2",
   "dependencies": {
+    "@tencent-connect/qqbot-connector": "1.2.0",
     "@tencent-connect/qqbot-nodejs": "^1.0.5",
+    "qrcode": "1.5.4",
     "zod": "4.4.3"
   },
   "peerDependencies": {

@@ -39,6 +39,7 @@ DSH_HOME=~/.dsh dsh --profile superagent web
 
 | 字段 | 说明 |
 |---|---|
+| 扫码绑定 | 只读：缺少凭据时这里显示实时的 QQ 扫码链接（自动刷新），扫码成功后凭据自动保存 |
 | AppID / AppSecret | QQ 机器人凭据；留空则读环境变量 `QQBOT_APPID` / `QQBOT_SECRET`（推荐） |
 | 接收的群 | `groupOpenid` + 接收模式（`仅 @` / `全部消息`） |
 | 其他群 | 未列出的群：`不接收` / `仅 @` |

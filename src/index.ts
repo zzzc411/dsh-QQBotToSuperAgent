@@ -9,6 +9,7 @@ export { qqKind, QQConfigSchema, credentials, qqSettings, type QQConfig } from '
 export { qqTrigger, qqChannel, qqTime, qqId, SOURCE } from './trigger'
 export { sendQq, qqLink } from './channel'
 export { setBot, getBot } from './bot'
+export { bindQr, bindState, bindSummary, credentialsPath, dshHome, type BoundCredentials } from './bind'
 export type {
   SourceKind, SourceHost, SourceContext, SourceChannel, SourcePolicyPart,
   Trigger, OutboundMessage, ChannelRef, ThreadRef, ActorRef, ScopeResult,

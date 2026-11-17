@@ -22,6 +22,7 @@
 - 入站 scope 过滤（哪些群 / 私聊接收工作）、出站 channel（回消息）、policy（允许发起工作的用户 openid、可成为候选的机器人 openid）。
 - 执行环境变量注入（`DSH_SUPERAGENT_QQ_SCOPE` / `DSH_SUPERAGENT_QQ_CHAT`）。
 - 健康上报（`qq` 条目），断线自动重连（退避），Source 关闭时 5 秒内停止消费者。
+- **扫码绑定**：缺少凭据时自动用 `@tencent-connect/qqbot-connector` 的 `startQrConnect` 生成扫码链接，把实时链接显示在 Source 卡片的「扫码绑定」事实项和 `qq` 健康行里；扫码成功后凭据写入 `$DSH_HOME/.qq-bot-credentials.json` 并自动连接（无需手填 AppID/AppSecret）。
 
 ### 2.2 明确不做（v0.1.0）
 

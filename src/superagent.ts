@@ -88,6 +88,7 @@ export type FieldSpec =
   | FieldBase & { type: 'select'; options: { value: string; label: Localized }[] }
   | FieldBase & { type: 'number'; min: number; max: number }
   | FieldBase & { type: 'text'; pattern?: string; readonly?: boolean; choose?: Localized }
+  | FieldBase & { type: 'fact'; settings?: 'deployment' }
   | FieldBase & { type: 'rows'; columns: Array<
       | { key: string; label: Localized; type: 'text'; pattern?: string; optional?: boolean; choose?: Localized; refresh?: Localized }
       | { key: string; label: Localized; type: 'select'; options: { value: string; label: Localized }[] }
@@ -125,6 +126,8 @@ export interface SourceKind<C extends Record<string, unknown> = Record<string, u
   schema: unknown
   fields: FieldSpec[]
   health: string[]
+  /** Read-only facts shown beside the Source card's fields (undefined while setup is pending). */
+  facts?(deployment: Deployment | undefined): Record<string, Localized | string>
   scope?(input: { meta: Record<string, unknown> }, config: C): ScopeResult
   channel?: SourceChannel<C>
   find?(query: string): { threads: string[]; terms: string[] }

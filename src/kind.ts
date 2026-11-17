@@ -1,5 +1,7 @@
 /** The QQ Source kind: configuration schema, UI fields, scope, channel, and policy. */
+import { readFileSync } from 'node:fs'
 import { z } from 'zod'
+import { bindSummary, credentialsPath } from './bind'
 import { qqLink, sendQq } from './channel'
 import { SOURCE } from './trigger'
 import type { Localized, SourceKind } from './superagent'
@@ -24,12 +26,19 @@ export const QQConfigSchema = z.object({
 
 export type QQConfig = z.infer<typeof QQConfigSchema>
 
-/** Resolves AppID/AppSecret from config, falling back to environment variables. */
+/**
+ * Resolves AppID/AppSecret from the Source config, the environment, or the file
+ * the QR bind writes (`$DSH_HOME/.qq-bot-credentials.json`), in that order.
+ */
 export function credentials(config: QQConfig): { appId: string; appSecret: string } {
   const appId = config.appId || process.env.QQBOT_APPID || ''
   const appSecret = config.appSecret || process.env.QQBOT_SECRET || ''
-  if (!appId || !appSecret) throw new Error('The QQ Source needs an AppID and AppSecret (configure them or set QQBOT_APPID / QQBOT_SECRET)')
-  return { appId, appSecret }
+  if (appId && appSecret) return { appId, appSecret }
+  try {
+    const file = JSON.parse(readFileSync(credentialsPath(), 'utf8')) as { appId?: string; appSecret?: string }
+    if (file.appId && file.appSecret) return { appId: file.appId, appSecret: file.appSecret }
+  } catch { /* no bind result yet */ }
+  throw new Error('The QQ Source needs an AppID and AppSecret (configure them, set QQBOT_APPID / QQBOT_SECRET, or scan the bind QR in this card)')
 }
 
 const PolicySchema = z.object({
@@ -50,6 +59,10 @@ export const qqKind: SourceKind<QQConfig> = {
   },
   schema: QQConfigSchema,
   fields: [
+    {
+      key: 'bind', type: 'fact', label: { zh: '扫码绑定', en: 'QR bind' },
+      hint: { zh: '首次使用：Source 运行时会自动生成 QQ 扫码链接并显示在这里；手机 QQ 扫码后凭据自动保存，无需手填 AppID/AppSecret。', en: 'First use: the Source generates a QQ scan link and shows it here; scanning with QQ saves the credentials automatically.' },
+    },
     {
       key: 'appId', type: 'text', label: { zh: 'AppID', en: 'AppID' },
       hint: { zh: 'QQ 开放平台的机器人 AppID；留空则读环境变量 QQBOT_APPID。保存后重启 dsh-superagent 生效。', en: 'QQ Open Platform bot AppID; empty reads QQBOT_APPID. Saving restarts dsh-superagent.' },
@@ -74,6 +87,8 @@ export const qqKind: SourceKind<QQConfig> = {
     { key: 'directMessages', type: 'switch', label: { zh: '接收私聊', en: 'Direct messages' } },
   ],
   health: ['qq'],
+  /** Shown in the Source card: the live QR-bind link while waiting, or the bound bot/openid. */
+  facts: () => ({ bind: bindSummary() }),
   scope({ meta }, config) {
     if (meta.scope === 'c2c') return config.directMessages ? { listened: true, observed: false, row: 'direct' } : { listened: false, reason: 'direct_messages_not_allowed' }
     const group = config.groups.find(item => item.groupOpenid === meta.targetId)

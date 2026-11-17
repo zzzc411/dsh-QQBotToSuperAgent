@@ -2,6 +2,7 @@
 import type { Context } from '@deepseek-ai/cordis'
 import { QQBot } from '@tencent-connect/qqbot-nodejs'
 import { setTimeout as delay } from 'node:timers/promises'
+import { bindQr, bindState } from './bind'
 import { credentials, QQConfigSchema, qqKind, type QQConfig } from './kind'
 import { qqTrigger, SOURCE } from './trigger'
 import { setBot } from './bot'
@@ -37,12 +38,12 @@ async function runQq(ctx: SourceContext, signal: AbortSignal): Promise<void> {
       await delay(5000, undefined, { signal }).catch(() => {})
       continue
     }
-    let creds: { appId: string; appSecret: string }
+    let creds: { appId: string; appSecret: string } | undefined
     try { creds = credentials(config) }
-    catch (error) {
-      ctx.report('qq', { state: 'error', detail: String(error) })
-      await delay(15000, undefined, { signal }).catch(() => {})
-      continue
+    catch {
+      creds = await ensureCredentials(ctx, signal)
+      if (signal.aborted) break
+      if (!creds) { await delay(15000, undefined, { signal }).catch(() => {}); continue }
     }
     const running = new AbortController()
     const check = setInterval(() => { if (!ctx.config<QQConfig>(SOURCE)) running.abort() }, 5000)
@@ -56,6 +57,30 @@ async function runQq(ctx: SourceContext, signal: AbortSignal): Promise<void> {
     retry = consumerRetry(retry, Date.now() - began)
     await delay(retry, undefined, { signal }).catch(() => {})
   }
+}
+
+/**
+ * Runs the QR bind when no credentials are configured, surfacing the live scan
+ * URL in the QQ health line (which the Sources card shows). On success it returns
+ * the credentials the bind wrote to `$DSH_HOME/.qq-bot-credentials.json`.
+ */
+async function ensureCredentials(ctx: SourceContext, signal: AbortSignal): Promise<{ appId: string; appSecret: string } | undefined> {
+  // Keep the health line's URL current while the QR refreshes.
+  const ticker = setInterval(() => {
+    if (bindState.phase === 'waiting' && bindState.url) ctx.report('qq', { state: 'paused', detail: `需要扫码绑定：${bindState.url}` })
+  }, 3000)
+  try {
+    ctx.report('qq', { state: 'paused', detail: bindState.url ? `需要扫码绑定：${bindState.url}` : '正在生成扫码链接…' })
+    const bound = await bindQr(signal)
+    if (!bound) {
+      ctx.report('qq', { state: 'error', detail: bindState.error ? `扫码绑定失败：${bindState.error}` : '扫码绑定未完成' })
+      return undefined
+    }
+    const openid = bound.userOpenid ? `；请在「策略 → QQ → 允许的用户」加入 openid ${bound.userOpenid}` : ''
+    ctx.report('qq', { state: 'paused', detail: `已绑定 ${bound.appId}${openid}` })
+    await delay(3000, undefined, { signal }).catch(() => {})
+    return { appId: bound.appId, appSecret: bound.appSecret }
+  } finally { clearInterval(ticker) }
 }
 
 /** Wait before reconnecting: 1s after a run that stayed up for a minute, otherwise exponential backoff up to 60s. */
