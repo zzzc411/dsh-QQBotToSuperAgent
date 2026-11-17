@@ -32,6 +32,7 @@ export function registerBindRoutes(webServer: RouteHost): () => void {
         url: bindState.url,
         qrSvg,
         appId: bindState.appId ?? '',
+        appSecret: bindState.appSecret ?? '',
         openid: bindState.userOpenid ?? '',
         error: bindState.error ?? '',
       }))

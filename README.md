@@ -35,9 +35,12 @@ DSH_HOME=~/.dsh dsh --profile superagent web
 
 ## 配置入口
 
-启动后，左侧栏会出现一个 **「QQ 机器人」** 入口（QQ 机器人图标，与官方 `dsh-qqbot` 同款），点开就是扫码绑定面板；同时 DSH 设置的「QQ 机器人」栏目里也有同一面板。缺少凭据时插件会自动生成二维码，扫码成功后凭据自动保存并连接。
+启动后，左侧栏会出现一个 **「QQ 机器人」** 入口（QQ 机器人图标，与官方 `dsh-qqbot` 同款），点开就是扫码绑定 + 配置面板；同时 DSH 设置的「QQ 机器人」栏目里也有同一面板。
 
-详细的字段配置（AppID/AppSecret、接收的群、私聊、策略白名单）仍在 dsh-superagent 面板的「设置 → 源 → QQ」卡片里：
+- **扫码后自动写入**：二维码扫成功那一刻，插件会把 `appId` / `appSecret` 写进 superagent 的 QQ Source 配置，并把你的 `openid` 加进策略白名单，无需手动复制粘贴。
+- **配置展示/编辑**：同一个面板里直接显示并修改 AppID、AppSecret、接收私聊、其他群、允许发起工作的 openid；保存即写回 superagent 的 `source:qq` 与 `policy`。
+
+详细的字段配置（接收的群等）仍在 dsh-superagent 面板的「设置 → 源 → QQ」卡片里：
 
 ## 配置（在 dsh-superagent 管理面板里）
 
@@ -65,6 +68,17 @@ QQ → WebSocket → QQBot → qqTrigger() → Trigger → superagent intake
 - 私聊 = 明确的请求（`addressed: 'direct'`）。
 - 群 @机器人 = 明确的请求（`addressed: 'mention'`）；群「全部消息」模式下的非 @消息只作为评估的候选。
 - 机器人自己的消息、白名单外的用户、不在接收范围的群，都不会产生工单。
+
+## 常见问题：QQ 里发消息没反应
+
+收到消息却不建工单、不回消息，通常是被下面两道闸门挡掉了，二者缺一不可：
+
+1. **发送者不在白名单** → 决策记录 `ignore / not_a_member`。把 openid 加进「策略 → QQ → 允许发起工作的用户」。扫码绑定时插件会自动加，手工填的话要自己补。
+2. **评估模式是 `observe`**（superagent 默认）→ 只评估不接单，永远不建工单。要在「设置 → 评估」把模式改成 `auto`。
+
+排查时看 superagent 的「评估」标签页：有 `not_a_member` 就是第 1 条，有决策但从不建工单就是第 2 条。
+
+另外注意 AppSecret 是 32 位密钥，不要把自己的 openid 粘进去——扫码自动写入可以避免这个错误。
 
 ## 安全
 

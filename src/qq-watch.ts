@@ -48,6 +48,9 @@ async function runQq(ctx: SourceContext, signal: AbortSignal): Promise<void> {
       if (signal.aborted) break
       if (!creds) { await delay(15000, undefined, { signal }).catch(() => {}); continue }
     }
+    // Mark the bind as done so the panel shows "connected" rather than a stale QR.
+    bindState.phase = 'success'
+    bindState.appId = creds.appId
     const running = new AbortController()
     const check = setInterval(() => { if (!ctx.config<QQConfig>(SOURCE)) running.abort() }, 5000)
     const stop = () => running.abort()

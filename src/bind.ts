@@ -10,6 +10,7 @@ export const bindState: {
   url: string
   phase: 'idle' | 'waiting' | 'success' | 'failed'
   appId?: string
+  appSecret?: string
   userOpenid?: string
   error?: string
 } = { url: '', phase: 'idle' }
@@ -49,6 +50,7 @@ export function bindQr(signal: AbortSignal): Promise<BoundCredentials | undefine
           }
           bindState.phase = 'success'
           bindState.appId = first.appId
+          bindState.appSecret = first.appSecret
           bindState.userOpenid = first.userOpenid
           try { writeFileSync(credentialsPath(), JSON.stringify(result, null, 2), { mode: 0o600 }) }
           catch { /* keep the credentials in memory for this run */ }
