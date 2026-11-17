@@ -10,5 +10,10 @@
 # install it into the profile that also loads dsh-superagent, otherwise the
 # plugin reports "required plugin did not activate".
 - insert:
+    # Package-root host row: a no-op that anchors client-module discovery so the
+    # browser panel (left-sidebar QQ entry + settings section) is loaded.
+    - id: dsh-qq-superagent
+      name: dsh-qq-superagent
+    # The QQ Source itself: registers the kind, runs the bot, serves bind routes.
     - id: dsh-qq-superagent-qq
       name: dsh-qq-superagent/qq-watch

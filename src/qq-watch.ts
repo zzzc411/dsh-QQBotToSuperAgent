@@ -3,18 +3,21 @@ import type { Context } from '@deepseek-ai/cordis'
 import { QQBot } from '@tencent-connect/qqbot-nodejs'
 import { setTimeout as delay } from 'node:timers/promises'
 import { bindQr, bindState } from './bind'
+import { registerBindRoutes } from './http'
 import { credentials, QQConfigSchema, qqKind, type QQConfig } from './kind'
 import { qqTrigger, SOURCE } from './trigger'
 import { setBot } from './bot'
 import type { SourceContext, SourceHost } from './superagent'
 
 export const name = 'dsh-qq-superagent-qq'
-export const inject = ['orchestrator']
+export const inject = ['orchestrator', 'webServer']
 
 export function apply(ctx: Context): void {
   const orchestrator = ctx.get('orchestrator') as unknown as SourceHost
+  const webServer = ctx.get('webServer') as unknown as Parameters<typeof registerBindRoutes>[0]
   ctx.logger.info('dsh-qq-superagent: QQ Source registered (kind=%s)', qqKind.kind)
   ctx.effect(() => orchestrator.sources.register(qqKind), 'qq: source kind')
+  ctx.effect(() => registerBindRoutes(webServer), 'qq: bind routes')
   ctx.effect(() => {
     const controller = new AbortController()
     const running = runQq(orchestrator.context(qqKind), controller.signal)

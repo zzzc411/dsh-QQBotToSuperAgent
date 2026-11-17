@@ -33,6 +33,12 @@ DSH_HOME=~/.dsh dsh --profile superagent web
 
 > 注意：`dsh-superagent` 运行在 dsh `0.2.1` 上。用哪个 `dsh` 二进制装的插件，就用同一个二进制启动。若你用的是隔离 DSH_HOME（如 dsh21 的 `isolate/0.2.1-rc.5`），`DSH_HOME` 要指向 superagent 实际所在 home。
 
+## 配置入口
+
+启动后，左侧栏会出现一个 **「QQ 机器人」** 入口（QQ 机器人图标，与官方 `dsh-qqbot` 同款），点开就是扫码绑定面板；同时 DSH 设置的「QQ 机器人」栏目里也有同一面板。缺少凭据时插件会自动生成二维码，扫码成功后凭据自动保存并连接。
+
+详细的字段配置（AppID/AppSecret、接收的群、私聊、策略白名单）仍在 dsh-superagent 面板的「设置 → 源 → QQ」卡片里：
+
 ## 配置（在 dsh-superagent 管理面板里）
 
 打开 superagent 面板的「Sources → QQ」，填：

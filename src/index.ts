@@ -1,10 +1,15 @@
 /**
  * dsh-qq-superagent: a QQ (official QQ Open Platform bot) Source for dsh-superagent.
  *
- * This package's bundle layer (`cordis.patch.yml`) inserts the `qq-watch` plugin,
- * which registers the QQ Source and runs the bot. This entry re-exports the pieces
- * other code may import programmatically.
+ * The bundle layer (`cordis.patch.yml`) inserts this package root as a no-op host
+ * row — it anchors client-module discovery (the browser panel) — and the
+ * `qq-watch` plugin, which registers the QQ Source and runs the bot.
  */
+export const name = 'dsh-qq-superagent'
+export const inject: string[] = []
+/** No-op host half; the Source itself lives in `./qq-watch`. */
+export function apply(): void { /* anchors the client module, nothing to mount */ }
+
 export { qqKind, QQConfigSchema, credentials, qqSettings, type QQConfig } from './kind'
 export { qqTrigger, qqChannel, qqTime, qqId, SOURCE } from './trigger'
 export { sendQq, qqLink } from './channel'
