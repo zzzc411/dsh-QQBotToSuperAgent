@@ -1,0 +1,14 @@
+# dsh-qq-superagent bundle layer.
+#
+# Installed via `dsh plugin --profile superagent add <path-or-name>`.
+# It only inserts the QQ Source plugin; the Source's own configuration
+# (appId / appSecret / groups / policy) lives in dsh-superagent's Settings
+# panel, never here. appId and appSecret may instead come from the
+# QQBOT_APPID / QQBOT_SECRET environment variables.
+#
+# The plugin injects `orchestrator`, the service dsh-superagent registers;
+# install it into the profile that also loads dsh-superagent, otherwise the
+# plugin reports "required plugin did not activate".
+- insert:
+    - id: dsh-qq-superagent-qq
+      name: dsh-qq-superagent/qq-watch
