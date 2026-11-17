@@ -12,6 +12,7 @@ export const inject = ['orchestrator']
 
 export function apply(ctx: Context): void {
   const orchestrator = ctx.get('orchestrator') as unknown as SourceHost
+  ctx.logger.info('dsh-qq-superagent: QQ Source registered (kind=%s)', qqKind.kind)
   ctx.effect(() => orchestrator.sources.register(qqKind), 'qq: source kind')
   ctx.effect(() => {
     const controller = new AbortController()
